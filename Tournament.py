@@ -1,8 +1,9 @@
 from itertools import combinations
 from random import shuffle
 from dPrisoner import dPrisoner
+from Prisoner import Prisoner
 from randomPrisoner import randomPrisoner
-
+from superPrisoner import superPrisoner
 """
 Prisoners' dilemma tournament
 """
@@ -73,8 +74,8 @@ class Tournament():
   def play_match(self, prisoner1, prisoner2, n_rounds = None):
 
     # Create instances of each prisoner
-    p1 = prisoner1()
-    p2 = prisoner2()
+    p1 = prisoner1(window=5,p=0.5,buffer_init=10)
+    p2 = prisoner2(window=5,p=0.5,buffer_init=10)
 
     # Initialize scores
     score1 = 0
@@ -113,7 +114,7 @@ class Tournament():
       self.scores[match[1]] += score2
 
 def run():
-  competing = [dPrisoner,randomPrisoner]
+  competing = [superPrisoner,randomPrisoner]
   a = Tournament(competing,1000)
   a.round_robin()
   print(a.scores)

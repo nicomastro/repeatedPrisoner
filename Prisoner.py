@@ -10,7 +10,7 @@ class Prisoner():
     Prisoner's strategy. This data will persist between
     rounds of a match but not between matches.
     """
-    def __init__(self):
+    def __init__(self,**kwargs):
         pass
     
     """
@@ -18,7 +18,7 @@ class Prisoner():
     If not overridden, the Prisoner will always cooperate.
     """
     def pick_strategy(self):
-        return False
+        return True
     
     """
     Process the results of a round. This provides an opportunity to

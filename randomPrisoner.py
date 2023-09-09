@@ -11,7 +11,7 @@ class randomPrisoner():
     Prisoner's strategy. This data will persist between
     rounds of a match but not between matches.
     """
-    def __init__(self):
+    def __init__(self,**kwargs):
         pass
     
   
