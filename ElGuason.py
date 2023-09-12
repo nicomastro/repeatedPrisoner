@@ -16,7 +16,7 @@ class ElGuason(Prisoner):
 #ante cada oponente; tener en cuenta que cuando pasan a competir con un nuevo oponente
 #se vuelve a ejecutar esta función, para arrancar desde 0.
 
-    def __init__(self):
+    def __init__(self,**kwargs):
         self.N = self.C = self.ci = 0 # inicializo los totales
         self.eC = 0
         self.other_strategy = True # asumo (arbitrariamente) que el oponente arranca cooperando
