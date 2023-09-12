@@ -83,8 +83,23 @@ class Tournament():
                        initiative=params['initiative'],
                        update_tolerance=params['update_tolerance'],
                        update_initiative=params['update_initiative'],
-                       op_initiative_low=0.2,op_initiative_high=0.8)
-        p2 = prisoner2()
+                       op_initiative_low=0.2,op_initiative_high=0.8) 
+
+        #p1 = prisoner1(budget=25,window=5,
+        #           p=0.5,buffer_init=80,k=4, 
+        #           streak_size=40,tolerance=4,
+        #           initiative=0.3,
+        #           update_tolerance=2,
+        #           update_initiative=0.9,
+        #           op_initiative_low=0.2,op_initiative_high=0.8) 
+        # reference
+        p2 = prisoner1(budget=25,window=40,
+                       p=1,buffer_init=40,k=4, 
+                       streak_size=5,tolerance=4,
+                       initiative=0.15,
+                       update_tolerance=2,
+                       update_initiative=0.8,
+                       op_initiative_low=0.2,op_initiative_high=0.8) 
 
         # Initialize scores
         score1 = 0
@@ -124,7 +139,7 @@ class Tournament():
           self.scores[match[1]] += score2
 
 def run(params):
-    competing = [superPrisoner,ElGuason]
+    competing = [superPrisoner,superPrisoner]
     a = Tournament(competing,300)
     a.round_robin(params)
     #print(a.scores)
@@ -134,10 +149,11 @@ def run(params):
          if a.scores[i] == m:
            winners.extend([i])
     #print("ganadores: ",winners)
-    return winners, a.scores[0]
+    return winners, a.scores
 
 # asumo partidas de 300 rondas en promedio
 
+#run({})
 scores = []
 strategy = []
 results = []
@@ -156,14 +172,20 @@ for budget in [0,25,125,300]: # mas grande, más agresivo
                                          'tolerance': tolerance, 'initiative': initiative,
                                          'update_tolerance': update_tolerance, 
                                          'update_initiative': update_initiative}
-                                winners, score = run(params)
-                                scores.append(-score)
+                                s1 = 0
+                                s2 = 0
+                                seeds = np.arange(15,200,15)
+                                for r in range(10):
+                                    np.random.seed(seeds[r])
+                                    _, s = run(params)
+                                    s1 += s[0]
+                                    s2 += s[1]
+                                scores.append(-s1/10)
                                 strategy.append(params)
-                                results.append(winners[0] == 0)
+                                results.append(s1 >= s2)
+
 ix = np.argsort(scores)
 top_10 = np.array(strategy)[ix][:10]
-print(top_10, -1*np.sort(scores)[:10], np.array(results)[ix])
-
-
+print(top_10, -1*np.sort(scores)[:10], np.array(results)[ix][:10])
 
 

@@ -1,0 +1,10 @@
+[{'budget': 0, 'window': 5, 'p': 1, 'buffer_init': 10, 'streak_size': 5, 'tolerance': 1, 'initiative': 0.1, 'update_tolerance': 1.2, 'update_initiative': 0.99}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.3, 'update_tolerance': 2, 'update_initiative': 0.99}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.3, 'update_tolerance': 1.2, 'update_initiative': 0.8}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.3, 'update_tolerance': 1.2, 'update_initiative': 0.9}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.3, 'update_tolerance': 1.2, 'update_initiative': 0.99}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.15, 'update_tolerance': 2, 'update_initiative': 0.8}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.15, 'update_tolerance': 2, 'update_initiative': 0.9}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.3, 'update_tolerance': 2, 'update_initiative': 0.9}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.15, 'update_tolerance': 2, 'update_initiative': 0.99}
+ {'budget': 25, 'window': 5, 'p': 0.5, 'buffer_init': 80, 'streak_size': 40, 'tolerance': 4, 'initiative': 0.15, 'update_tolerance': 1.2, 'update_initiative': 0.9}] [520 520 520 520 520 520 520 520 520 520] [ True  True  True  True  True  True  True  True  True  True]
