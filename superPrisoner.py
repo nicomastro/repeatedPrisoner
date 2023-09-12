@@ -1,4 +1,5 @@
-import numpy as np
+#import numpy as np
+import random 
 """
 Prisoner superclass
 """
@@ -49,7 +50,7 @@ class superPrisoner():
                 # Actualizar sensbilidad para apuestas
                 #print(self.tolerance, self.initiative, self.budget)
                 if len(self.op_history)  > self.streak_size:
-                    op_initiative = np.sum(self.op_history[-self.window:])
+                    op_initiative = sum(self.op_history[-self.window:])
                     if op_initiative < self.op_initiative_low*self.streak_size:
                         self.tolerance = int(min(self.tolerance*self.update_tolerance, self.streak_size))
                         self.initiative *= (2-self.update_initiative)
@@ -58,11 +59,22 @@ class superPrisoner():
                         self.tolerance = int(min((1/(self.update_tolerance))*self.tolerance, 1))
 
                 # Generar la seguidilla de proximas jugadas (streak) 
-                cs = np.repeat(True,max(min(self.tolerance, self.budget),0)) #Cs consecutivas
-                mixed_ds = np.logical_and(np.random.rand(max(self.streak_size - self.tolerance,0)) < self.initiative, self.budget > 0)
-                np.random.shuffle(mixed_ds)
-                new_streak = cs.tolist() + mixed_ds.tolist()
-                self.streak = new_streak if cs.size != 0 else [False]*10 # Si el oponente no juega Cs, generamos solo Ds
+                
+                # Numpy
+                #cs = np.repeat(True,max(min(self.tolerance, self.budget),0)) #Cs consecutivas
+                #mixed_ds = np.logical_and(np.random.rand(max(self.streak_size - self.tolerance,0)) < self.initiative, self.budget > 0)
+                #np.random.shuffle(mixed_ds)
+                #new_streak = cs.tolist() + mixed_ds.tolist()
+                #self.streak = new_streak if cs.size != 0 else [False]*10 # Si el oponente no juega Cs, generamos solo Ds
+                
+                # Python puro
+                cs = [True] * max(min(self.tolerance, self.budget), 0) 
+                mixed_ds = [random.random() < self.initiative and self.budget > 0 for _ in range(max(self.streak_size - self.tolerance, 0))]
+                random.shuffle(mixed_ds)
+                new_streak = cs + mixed_ds
+                self.streak = new_streak if len(cs) != 0 else [False] * 10  
+
+
             return self.streak.pop()
 
 
