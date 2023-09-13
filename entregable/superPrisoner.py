@@ -1,20 +1,20 @@
 #import numpy as np
+from Prisoner import Prisoner
 import random 
 """
 Prisoner superclass
 """
-class superPrisoner():
-
+class superPrisoner(Prisoner):
 
     def __init__(self):
         self.op_history = []
         self.my_history = []
-        self.name = "superPrisoner"
+        self.name = "patronPrisoner"
         self.budget = 0 # Cuanto puedo apostar (veces que arriesgo con C)
         self.window = 5 # El tamaño de la historia, movil, de mi rival
         self.p = 0.5 # Que porcentaje de la gancia apuesto
         self.buffer = 40 # Cuantas veces juego con D al principio
-        self.k = 4 # Parametro de largo maximo del patron a buscar
+        #self.k = 4 # Parametro de largo maximo del patron a buscar (deprecated)
         self.streak = []
         self.streak_size = 10 # Longitud de cada segudilla [C....C X X X X]
         self.tolerance = 8 # Cuantas Cs seguidas juego para invitar al otro
@@ -25,23 +25,21 @@ class superPrisoner():
         self.op_initiative_high = 0.8
 
     def pick_strategy(self):
-        patron = self.__there_is_a_patron()
-        if patron is None or patron is not None: # Lo ignoro por ahora
-            return self.__the_strategy()
-        else:
-          # Si el rival juega un patron, no lo podemos invitar a hacer C
-          # La mejora jugada siempre es D!
-          return False 
+        # Si el rival juega un patron, no lo podemos invitar a hacer C
+        # La mejora jugada siempre es D! (esta idea no la pulimos, no llegamos)
+        #patron = self.__there_is_a_patron()
+        return self.__the_strategy()
 
     def __the_strategy(self):
+
 
         # Jugar Ds para aumentar el budget inicial
         if self.buffer > 0:
             self.buffer -= 1
             return False 
         else:
+            print(self.streak)
             if self.streak == []:      
-
                 # Actualizar sensbilidad para apuestas (tolerance, initiative)
                 if len(self.op_history)  > self.streak_size:
                     op_initiative = sum(self.op_history[-self.window:])
@@ -52,7 +50,6 @@ class superPrisoner():
                     elif op_initiative > self.op_initiative_high*self.streak_size:
                         self.initiative *= self.update_initiative
                         self.tolerance = int(min((1/(self.update_tolerance))*self.tolerance, 1))
-
                 # Generar la seguidilla de proximas jugadas (streak)
                 # Cada seguidilla comienza con tantas Cs como indica tolerance
                 # Luego llenamos con, mayormente, Ds hasta alcanzar streak_size
@@ -65,9 +62,11 @@ class superPrisoner():
                 random.shuffle(mixed_ds)
                 new_streak = cs + mixed_ds
                 self.streak = new_streak if len(cs) != 0 else [False] * 10  
+                print(self.streak)
 
             return self.streak.pop()
 
+    # Chequear si hay patron
     def __there_is_a_patron(self):
         res = None
         for i in range(1, self.k):
@@ -104,7 +103,7 @@ class superPrisoner():
         self.op_history.append(other_strategy)
         self.my_history.append(my_strategy)
         earn  = self.__score(my_strategy, other_strategy)
-        self.budget -= -1 if earn < 0 else int(earn * self.p) 
+        self.budget += -1 if earn < 0 else int(earn * self.p) 
 
     def __score(self, strategy1, strategy2):
         if strategy1 and strategy2:

@@ -84,22 +84,14 @@ class Tournament():
                        update_tolerance=params['update_tolerance'],
                        update_initiative=params['update_initiative'],
                        op_initiative_low=0.2,op_initiative_high=0.8) 
-        p2 = prisoner2()
-        #p1 = prisoner1(budget=25,window=5,
-        #           p=0.5,buffer_init=80,k=4, 
-        #           streak_size=40,tolerance=4,
-        #           initiative=0.3,
-        #           update_tolerance=2,
-        #           update_initiative=0.9,
-        #           op_initiative_low=0.2,op_initiative_high=0.8) 
-        # reference
-        #p2 = prisoner2(budget=25,window=40,
-        #               p=1,buffer_init=40,k=4, 
-        #               streak_size=5,tolerance=4,
-        #               initiative=0.15,
-        #               update_tolerance=2,
-        #               update_initiative=0.8,
-        #               op_initiative_low=0.2,op_initiative_high=0.8) 
+      
+        p2 = prisoner2(budget=0,window=5,
+                       p=0.5,buffer_init=40,k=4, 
+                       streak_size=10,tolerance=8,
+                       initiative=0.3,
+                       update_tolerance=2,
+                       update_initiative=0.9,
+                       op_initiative_low=0.2,op_initiative_high=0.8) 
 
         # Initialize scores
         score1 = 0
@@ -139,16 +131,16 @@ class Tournament():
           self.scores[match[1]] += score2
 
 def run(params):
-    competing = [superPrisoner,dPrisoner]
+    competing = [superPrisoner,randomPrisoner]
     a = Tournament(competing,300)
     a.round_robin(params)
-    #print(a.scores)
+    print(a.scores)
     m=max(a.scores)
     winners=[]
     for i in range(len(competing)):
          if a.scores[i] == m:
            winners.extend([i])
-    #print("ganadores: ",winners)
+    print("ganadores: ",winners)
     return winners, a.scores
 
 # Asumo partidas de 300 rondas en promedio
@@ -164,9 +156,9 @@ for budget in [0,25,125]: # mas grande, más agresivo
         for buffer_init in [10,20,40,80]: # mas grande más conservador
             for streak_size in [5,10,20,40]:
                 for tolerance in [1,2,4,8]:
-                    for initiative in [0.1,0.3]:
-                        for update_tolerance in [1.5, 2]:
-                            for update_initiative in [0.9, 0.8]:
+                    for initiative in [0.3]:
+                        for update_tolerance in [1.5,2]:
+                            for update_initiative in [0.9]:
                                 params ={'budget':budget,'window': window,'p' : p,
                                          'buffer_init': buffer_init,'streak_size': streak_size,
                                          'tolerance': tolerance, 'initiative': initiative,
@@ -184,8 +176,9 @@ for budget in [0,25,125]: # mas grande, más agresivo
                                 strategy.append(params)
                                 results.append(s1 >= s2)
 
+
 ix = np.argsort(scores)
-top_10 = np.array(strategy)[ix][:10]
-print(top_10, -1*np.sort(scores)[:10], np.array(results)[ix][:10])
+top_10 = np.array(strategy)[ix][:50]
+print(top_10, -1*np.sort(scores)[:50], np.array(results)[ix][:50])
 
 

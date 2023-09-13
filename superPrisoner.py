@@ -110,12 +110,11 @@ class superPrisoner():
 
       return res
 
-
     def process_results(self, my_strategy, other_strategy):
         self.op_history.append(other_strategy)
         self.my_history.append(my_strategy)
         earn  = self.__score(my_strategy, other_strategy)
-        self.budget -= -1 if earn < 0 else int(earn * self.p) 
+        self.budget += -1 if earn < 0 else int(earn * self.p) 
 
     def __score(self, strategy1, strategy2):
         if strategy1 and strategy2:
