@@ -11,15 +11,15 @@ class superPrisoner():
         self.my_history = []
         self.name = "superPrisoner"
         self.budget = 0 # Cuanto puedo apostar (veces que arriesgo con C)
-        self.window = 5
-        self.p = 0.5
-        self.buffer = 40
+        self.window = 5 # El tamaño de la historia, movil, de mi rival
+        self.p = 0.5 # Que porcentaje de la gancia apuesto
+        self.buffer = 40 # Cuantas veces juego con D al principio
         self.k = 4 # Parametro de largo maximo del patron a buscar
         self.streak = []
         self.streak_size = 10 # Longitud de cada segudilla [C....C X X X X]
         self.tolerance = 8 # Cuantas Cs seguidas juego para invitar al otro
-        self.initiative = 0.3 # Que tan propenso soy a intercalar Cs en la parte "alta" de la seguidilla
-        self.update_tolerance = 2
+        self.initiative = 0.3 # Que tan propenso soy a intercalar Cs en la parte "alta" de un streak
+        self.update_tolerance = 2 
         self.update_initiative = 0.9
         self.op_initiative_low = 0.2
         self.op_initiative_high = 0.8
@@ -46,7 +46,8 @@ class superPrisoner():
                 if len(self.op_history)  > self.streak_size:
                     op_initiative = sum(self.op_history[-self.window:])
                     if op_initiative < self.op_initiative_low*self.streak_size:
-                        self.tolerance = int(min(self.tolerance*self.update_tolerance, self.streak_size))
+                        self.tolerance = int(min(self.tolerance*self.update_tolerance, 
+                                                 self.streak_size))
                         self.initiative *= (2-self.update_initiative)
                     elif op_initiative > self.op_initiative_high*self.streak_size:
                         self.initiative *= self.update_initiative
@@ -55,11 +56,12 @@ class superPrisoner():
                 # Generar la seguidilla de proximas jugadas (streak)
                 # Cada seguidilla comienza con tantas Cs como indica tolerance
                 # Luego llenamos con, mayormente, Ds hasta alcanzar streak_size
-                # Dentro de esta última parte, generar algunas Cs para generar algo de ruido
+                # Dentro de esta última parte, generar algunas Cs para generar ruido
                 # Una initiative mayor admite una secuencia más impura de Ds
 
                 cs = [True] * max(min(self.tolerance, self.budget), 0) 
-                mixed_ds = [random.random() < self.initiative and self.budget > 0 for _ in range(max(self.streak_size - self.tolerance, 0))]
+                mixed_ds = [random.random() < self.initiative and self.budget > 0 for _ in
+                                range(max(self.streak_size - self.tolerance, 0))]
                 random.shuffle(mixed_ds)
                 new_streak = cs + mixed_ds
                 self.streak = new_streak if len(cs) != 0 else [False] * 10  
