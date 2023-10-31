@@ -90,32 +90,32 @@ class Jugador:
 
     def __init__(self, gustos):
         self.gustos = Jugador.normalizar_gustos(gustos)
-        print(self.gustos, "aa2")
         #self.gustos = gustos
         self.umbral_de_correlacion = 0.5
-        self.porcentaje_bin = 1/512
+        self.porcentaje_bin = 1/64
 
     # Dada una porcion devuelve la utilidad de la misma para el jugador
     def utilidad(self, porcion):
         return sum([self.gustos[c] for c in porcion])
 
-    def obtener_bins(self, torta, p_bins):
+    def obtener_bins(self, torta, p_bins,start=0):
         bin_1, bin_2, bin_3 = [0], [0], [0]
         bin_size = round(len(torta)*p_bins)
         i = 0
-        for s in torta:
+        for i in range(len(torta)):
             i += 1
             if i > bin_size:
                 i = 0
+                start += bin_size
                 bin_1.append(0)
                 bin_2.append(0)
                 bin_3.append(0)
 
-            if s == "1":
+            if torta[(start+i) % bin_size] == "1":
                 bin_1[-1] += 1
-            elif s == "2":
+            elif torta[(start+i) % bin_size] == "2":
                 bin_2[-1] += 1
-            elif s == "3":
+            elif torta[(start+i) % bin_size] == "3":
                 bin_3[-1] += 1
 
         return bin_1, bin_2, bin_3
@@ -128,11 +128,11 @@ class Jugador:
 
         return bin
 
-    def obtener_indices_del_bin_maximo(self, torta, bin, p_bins):
+    def obtener_indices_del_bin_maximo(self, torta, bin, p_bins,start=0):
         maximo = max(bin)
         argmax = bin.index(maximo)
         bin_size = round(len(torta)*p_bins)
-        return (bin_size*argmax, bin_size*(argmax+1))
+        return (start + bin_size*argmax, start + bin_size*(argmax+1))
         
     def encontrar_mejores_indices_en(self, torta, indices_maximo_bin, rival):
         mejor_temp = (0, 1)
@@ -184,32 +184,36 @@ class Jugador:
         mejor_utilidad = 0
         print(torta)
         for p in ps:
-            # TODO: Randomizar el X0 desde donde se toma la partición
-            bin_1, bin_2, bin_3 = self.obtener_bins(torta,p)
-            bin = self.degustar_bins(bin_1, bin_2, bin_3)
-            print(bin)
-            i, j = self.obtener_indices_del_bin_maximo(torta, bin,p)
-            print(i,j)
-            # No busco todos los subcortes en esta region, porque deberían ser peor
-            corte1, corte2 = self.cortar(torta, (i, j))
-            porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
-            if self.utilidad(porcion_j1) > mejor_utilidad:
-                mejor_temp = (i,j)
-                mejor_utilidad = self.utilidad(porcion_j1)
+            # Randomizar el X0 desde donde se toma la partición
+            N_OFFSETS = 10
+            for start in np.random.choice(len(torta), N_OFFSETS):
+                bin_1, bin_2, bin_3 = self.obtener_bins(torta,p,start)
+                bin = self.degustar_bins(bin_1, bin_2, bin_3)
+                i, j = self.obtener_indices_del_bin_maximo(torta, bin,p,start)
+                print(i,j)
+                # No busco todos los subcortes en esta region, porque deberían ser peor
+                corte1, corte2 = self.cortar(torta, (i, j))
+                porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
+                if self.utilidad(porcion_j1) > mejor_utilidad:
+                    mejor_temp = (i,j)
+                    mejor_utilidad = self.utilidad(porcion_j1)
 
+        
+        print("best",mejor_temp[1], mejor_temp[0])
         return mejor_temp
 
     # con T = 1024 ya no tarda tiempo despreciable (en mi humilde notebook)
     def perfect_cut(self, torta, rival):
         mejor_temp = (0, 1)
         mejor_utilidad = 0
-        for i in range(0, len(torta)):
+        for i in range(0, len(torta)-1):
             for j in range(i+1, len(torta)):
                 corte1, corte2 = self.cortar(torta, (i, j))
                 porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
                 if self.utilidad(porcion_j1) > mejor_utilidad:
                     mejor_temp = (i,j)
                     mejor_utilidad = self.utilidad(porcion_j1)
+
         return mejor_temp
 
     # Dadas dos porciones devuelve la que mas utilidad le genera al jugador
@@ -223,7 +227,7 @@ class Jugador:
         
      
         
-jugador1 = Jugador({'1': 10, '2': 1, '3': 0})
-jugador2 = Jugador({'1': 0, '2': 3, '3': 10})
-juego = Juego(256, 10, jugador1, jugador2)
+jugador1 = Jugador({'1': 10, '2':0 , '3': 1})
+jugador2 = Jugador({'1': 1, '2':0, '3': 10})
+juego = Juego(2**8, 1, jugador1, jugador2)
 juego.jugar()
