@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import sys
 componentes = ['1', '2', '3']
 # Glosario:
     # gusto: es un diccionario con claves {'1', '2', '3'}
@@ -34,43 +35,39 @@ class Juego:
         utilidad2 = 0
         for i in range(self.N):
             torta = self.generar_torta()
-            corte = jugador1.cut2(torta, jugador2)
+            corte = jugador1.cut(torta, jugador2)
             corte_perfecto = jugador1.perfect_cut(torta, jugador2)
 
             porcion1, porcion2 = Jugador.cortar(torta, corte)
             porcion1_perf, porcion2_perf = Jugador.cortar(torta, corte_perfecto)
 
             porcion_j2, porcion_j1 = jugador2.choose(porcion1, porcion2)
-            porcion_j2_per, porcion_j1_perf = jugador2.choose(porcion1_perf, porcion2_perf)
+            porcion_j2_perf, porcion_j1_perf = jugador2.choose(porcion1_perf, porcion2_perf)
+
 
             self.score1.append(jugador1.utilidad(porcion_j1))
             self.score2.append(jugador2.utilidad(porcion_j2))
 
             self.perfect_score1.append(jugador1.utilidad(porcion_j1_perf))
-            self.perfect_score2.append(jugador2.utilidad(porcion_j2_per))
+            self.perfect_score2.append(jugador2.utilidad(porcion_j2_perf))
 
 
             ### TODO: Completar bien esta funcion
-            self.print_info(self.score1[-1], self.score2[-1])
-            self.print_info(self.perfect_score1[-1], self.perfect_score2[-1])
+            print(f"Iteracion: {i+1}")
+            self.print_info("Algoritmo Heuristico: ", self.score1[-1], self.score2[-1])
+            self.print_info("Algoritmo Perfecto: ", self.perfect_score1[-1], self.perfect_score2[-1])
+            print("")
 
-        print("Perfectness", np.sum(self.score1)/np.sum(self.perfect_score1),
-                             np.sum(self.score2)/np.sum(self.perfect_score2))
+        self.print_info("Utilidad acumulada:", np.sum(self.score1), np.sum(self.score2))
+        print("Perfectness", np.sum(self.score1)/np.sum(self.perfect_score1))
 
-
-
-    def print_info(self, utilidad_j1, utilidad_j2):
+    def print_info(self, titulo, utilidad_j1, utilidad_j2):
         ### TODO: Completar bien esta funcion
-        print(f'Jugador 1: {utilidad_j1}')
-        print(f'Jugador 2: {utilidad_j2}')
+        print(titulo)
+        print(f'   Jugador 1: {utilidad_j1}')
+        print(f'   Jugador 2: {utilidad_j2}')
 
 class Jugador:
-    
-    @staticmethod
-    def correlacion_de_gustos(g1, g2):
-        ### TODO: Completar bien esta funcion
-        #return np.corrocoef(g1,g2)[1,0]
-        return 1.0
 
     # Dada una torta y un corte(tupla de dos enteros), devuelve las dos porciones que este define
     @staticmethod
@@ -89,9 +86,8 @@ class Jugador:
         return gustos
 
     def __init__(self, gustos):
-        self.gustos = Jugador.normalizar_gustos(gustos)
-        #self.gustos = gustos
-        self.umbral_de_correlacion = 0.5
+        #self.gustos = Jugador.normalizar_gustos(gustos)
+        self.gustos = gustos
         self.porcentaje_bin = 1/64
 
     # Dada una porcion devuelve la utilidad de la misma para el jugador
@@ -144,45 +140,15 @@ class Jugador:
                 if self.utilidad(porcion_j1) > mejor_utilidad:
                     mejor_temp = (i,j)
                     mejor_utilidad = self.utilidad(porcion_j1)
-                #utilidad1 = self.utilidad(corte1)
-                #utilidad2 = self.utilidad(corte2)
-                #if (utilidad1 > mejor_utilidad):
-                #    mejor_temp = (i, j)
-                #    mejor_utilidad = utilidad1
-                #if utilidad2 > mejor_utilidad:
-                #    mejor_temp = (j, i)
-                #    mejor_utilidad = utilidad2
                 
-
         return mejor_temp
 
-    # Dada una torta y el rival devuelve un corte
-    def cut(self, torta, rival):
-        ### TODO: Completar bien esta funcion
-        if Jugador.correlacion_de_gustos(self.gustos, rival.gustos) > self.umbral_de_correlacion:
-            # Hago los bins y me fijo todos los posibles cortes en el mejor rango de bins
-            bin_1, bin_2, bin_3 = self.obtener_bins(torta, self.porcentaje_bin)
-            bin = self.degustar_bins(bin_1, bin_2, bin_3)
-            indices_maximo_bin = self.obtener_indices_del_bin_maximo(torta, bin,self.porcentaje_bin)
-            print(torta)
-            print(bin)
-            print(indices_maximo_bin)
-            print(self.encontrar_mejores_indices_en(torta, indices_maximo_bin,rival))
-            return self.encontrar_mejores_indices_en(torta, indices_maximo_bin,rival)
-        else:
-
-            return (0, 4)
-        
-        return (0, 1)
-
-
     # Dada una torta y el rival devuelve un corte. La pienso asumiendo correlación negativa
-    def cut2(self, torta, rival):
+    def cut(self, torta, rival):
         # Hago los bins y me fijo todos los posibles cortes en el mejor rango de bins
         ps = [(2**i)*self.porcentaje_bin for i in range(np.log2(1/self.porcentaje_bin).astype(int))]
         mejor_temp = (0, 1)
         mejor_utilidad = 0
-        print(torta)
         for p in ps:
             # Randomizar el X0 desde donde se toma la partición
             N_OFFSETS = 10
@@ -190,7 +156,7 @@ class Jugador:
                 bin_1, bin_2, bin_3 = self.obtener_bins(torta,p,start)
                 bin = self.degustar_bins(bin_1, bin_2, bin_3)
                 i, j = self.obtener_indices_del_bin_maximo(torta, bin,p,start)
-                print(i,j)
+                
                 # No busco todos los subcortes en esta region, porque deberían ser peor
                 corte1, corte2 = self.cortar(torta, (i, j))
                 porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
@@ -199,7 +165,7 @@ class Jugador:
                     mejor_utilidad = self.utilidad(porcion_j1)
 
         
-        print("best",mejor_temp[1], mejor_temp[0])
+        #print("Best:", mejor_temp[1], mejor_temp[0])
         return mejor_temp
 
     # con T = 1024 ya no tarda tiempo despreciable (en mi humilde notebook)
@@ -224,10 +190,26 @@ class Jugador:
             return porcion1, porcion2
         else:
             return porcion2, porcion1
-        
+
+def print_usage():
+    print("Modo de uso: ./main.py T N")
+    print("     T = Largo de la torta")
+    print("     N = Cantidad de iteraciones")
      
-        
-jugador1 = Jugador({'1': 10, '2':0 , '3': 1})
-jugador2 = Jugador({'1': 1, '2':0, '3': 10})
-juego = Juego(2**8, 1, jugador1, jugador2)
-juego.jugar()
+if __name__ == "__main__":
+    # Modificar estas varibles para alterar los gustos de cada jugador
+    gustos_jugador1 = {'1': 5, '2': 5, '3': 5} 
+    gustos_jugador2 = {'1': 1, '2': 0, '3': 1}
+
+    try:
+        T = int(sys.argv[1])
+        N = int(sys.argv[2])
+    except Exception:
+        print("Parametros incorrectos")
+        print_usage()
+        exit(1)
+    
+    jugador1 = Jugador(gustos_jugador1)
+    jugador2 = Jugador(gustos_jugador2)
+    juego = Juego(T, N, jugador1, jugador2)
+    juego.jugar()
