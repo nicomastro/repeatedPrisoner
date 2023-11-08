@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import sys
-import seaborn as sns
+
 componentes = ['1', '2', '3']
 # Glosario:
     # gusto: es un diccionario con claves {'1', '2', '3'}
@@ -39,17 +39,19 @@ class Juego:
         cut_sizes = []
         for i in range(self.N):
             torta = self.generar_torta()
+
             corte = self.jugador1.cut(torta, self.jugador2)
             corte_perfecto = self.jugador1.perfect_cut(torta, self.jugador2)
 
             porcion1, porcion2 = Jugador.cortar(torta, corte)
             porcion1_perf, porcion2_perf = Jugador.cortar(torta, corte_perfecto)
-            self.perfect_sizes.append(len(porcion1_perf))
-            self.cut_sizes.append(len(porcion1))
-
+         
             porcion_j2, porcion_j1 = self.jugador2.choose(porcion1, porcion2)
             porcion_j2_perf, porcion_j1_perf = self.jugador2.choose(porcion1_perf, porcion2_perf)
 
+
+            self.perfect_sizes.append(len(porcion_j1_perf))
+            self.cut_sizes.append(len(porcion_j1))
             #print("", porcion1_perf)
 
             self.score1.append(self.jugador1.utilidad(porcion_j1))
@@ -58,12 +60,10 @@ class Juego:
             self.perfect_score1.append(self.jugador1.utilidad(porcion_j1_perf))
             self.perfect_score2.append(self.jugador2.utilidad(porcion_j2_perf))
             
-
-            ### TODO: Completar bien esta funcion
             #print(f"Iteracion: {i+1}")
-            #self.print_info("Algoritmo Heuristico: ", self.score1[-1], self.score2[-1])
-            #self.print_info("Algoritmo Perfecto: ", self.perfect_score1[-1], self.perfect_score2[-1])
-            #print("")
+            self.print_info("Algoritmo Heuristico: ", self.score1[-1], self.score2[-1])
+            self.print_info("Algoritmo Perfecto: ", self.perfect_score1[-1], self.perfect_score2[-1])
+            print("")
 
         self.print_info("Utilidad acumulada:", np.sum(self.score1), np.sum(self.score2))
         print("Perfectness", np.sum(self.score1)/np.sum(self.perfect_score1))
@@ -173,24 +173,24 @@ class Jugador:
                     mejor_utilidad = self.utilidad(porcion_j1)
 
         start, end = mejor_temp
-        #for k in range(end+1, end+N_OFFSETS):
-        #    if k >= self.T:
-        #        break
-        #    corte1, corte2 = self.cortar(torta, (start, k))
-        #    porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
-        #    if self.utilidad(porcion_j1) > mejor_utilidad:
-        #        mejor_temp = (start,k)
-        #        mejor_utilidad = self.utilidad(porcion_j1)
-#
-#        #for k in range(start-N_OFFSETS,start-1):
-#        #    if k <= 0:
-#        #        break 
-#        #    corte1, corte2 = self.cortar(torta, (k, end))
-#        #    porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
-#        #    if self.utilidad(porcion_j1) > mejor_utilidad:
-#        #        mejor_temp = (k,end)
-#        #        mejor_utilidad = self.utilidad(porcion_j1)
-#
+        for k in range(end+1, end+N_OFFSETS):
+            if k >= self.T:
+                break
+            corte1, corte2 = self.cortar(torta, (start, k))
+            porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
+            if self.utilidad(porcion_j1) > mejor_utilidad:
+                mejor_temp = (start,k)
+                mejor_utilidad = self.utilidad(porcion_j1)
+
+        for k in range(start-N_OFFSETS,start-1):
+            if k <= 0:
+                break 
+            corte1, corte2 = self.cortar(torta, (k, end))
+            porcion_j2, porcion_j1 = jugador2.choose(corte1, corte2)
+            if self.utilidad(porcion_j1) > mejor_utilidad:
+                mejor_temp = (k,end)
+                mejor_utilidad = self.utilidad(porcion_j1)
+
         #print("Best:", mejor_temp[1], mejor_temp[0])
         return mejor_temp
 
@@ -225,8 +225,8 @@ def print_usage():
 
 if __name__ == "__main__":
     # Modificar estas varibles para alterar los gustos de cada jugador
-    gustos_jugador1 = {'1': 5, '2': 5, '3': 5} 
-    gustos_jugador2 = {'1': 1, '2': 0, '3': 1}
+    gustos_jugador1 = {'1': 0, '2': 10, '3': 10} 
+    gustos_jugador2 = {'1': 1000, '2': 0, '3': 0}
 
     try:
         T = int(sys.argv[1])
@@ -240,5 +240,3 @@ if __name__ == "__main__":
     jugador2 = Jugador(gustos_jugador2, T)
     juego = Juego(T, N, jugador1, jugador2)
     juego.jugar()
-    print(juego.cut_sizes)
-    print(juego.perfect_sizes)
