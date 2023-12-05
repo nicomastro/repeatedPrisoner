@@ -20,60 +20,59 @@ import numpy as np
 
 class Game:
 
-    def __init__(self, ns, rs):
-    	self.ns = ns
-    	self.rs = rs
-    	self.moves = [] # sequence of games (left, player 0, goes first)
-    	self.score = 0
+	def __init__(self, ns, rs):
+		self.ns = ns
+		self.rs = rs
+		self.moves = [] # sequence of games (left, player 0, goes first)
+		self.score = 0
 
-    def isLeaf(self):
-    	return (self.rs[0] > self.ns[0] and self.rs[0] > self.ns[1] 
-    			and self.rs[0] > self.ns[2])
+	def isLeaf(self):
+		return (self.rs[0] > self.ns[0] and self.rs[0] > self.ns[1] 
+				and self.rs[0] > self.ns[2])
 
-    def valor(self):
-    	if jugadas_previas.get(self) is not None:
-    		print("a")
-    		return jugadas_previas[self]
-    	if self.isLeaf():
-    		self._value = 1
-    		return self._value
-    	else:
-    		children = self.children()
-    		self._value = int(np.sum([h.valor() for h in children]) != len(children))
-    		self.score += np.sum([ch.score for ch in children])
-    	
-    	jugadas_previas[self] = self._value
+	def valor(self):
 
-    	if self._value == 1:
-    		option = [h for h in children if h._value == 0][0] # any p move
-    	else:
-    		option = children[np.argmax([ch.score for ch in children])]
-    	
-    	l = option.moves
-    	self.moves = [option] + l 
-    	return self._value
+		if self.isLeaf():
+			self._value = 1
+			return self._value
+		elif jugadas_previas.get(self.id()) is not None:
+			self._value, self.moves = jugadas_previas[self.id()]
+		else:
+			children = self.children()
+			self._value = int(np.sum([h.valor() for h in children]) != len(children))
+			self.score += np.sum([ch.score for ch in children])		
 
-    def children(self):
-    	children = []
-    	for r in self.rs:
-    		for i, n in enumerate(self.ns):
-    			if r <= n:
-    				new_ns = self.ns.copy()
-    				new_ns[i] -= r	
-    				children.append(Game(new_ns,self.rs))
+			if self._value == 1:
+				option = [h for h in children if h.valor() == 0][0] # any p move
+			else:
+				option = children[np.argmax([ch.score for ch in children])]
+		
+			l = option.moves
+			self.moves = [option] + l
+			jugadas_previas[self.id()] = (self._value, self.moves)
+		return self._value
 
-    	return children	
+	def children(self):
+		children = []
+		for r in self.rs:
+			for i, n in enumerate(self.ns):
+				if r <= n:
+					new_ns = self.ns.copy()
+					new_ns[i] -= r	
+					children.append(Game(new_ns,self.rs))
 
-    def __hash__(self):
-    	return hash(tuple(sorted(self.ns)))
+		return children	
 
-    def __str__(self):
+	def id(self):
+		return tuple(sorted(self.ns))
 
-    	return ('|' + '*'*self.ns[0] +'|' + '*'*self.ns[1] + '|' + '*'*self.ns[2] + '|')
+	def __repr__(self):
+		return ('|' + '*'*self.ns[0] +'|' + '*'*self.ns[1] + '|' + '*'*self.ns[2] + '|')
 
+# n3 < 200 deberia ser razonable
 
-ns = [1,2,2]
-rs = [1,1,2]
+ns = [200,100,100]
+rs = [1,2,3]
 assert(ns[0] <= ns[1] <= ns[2])
 assert(0 < rs[0] <= rs[1] <= rs[2])
 d = {0: 'P', 1:'N'}
